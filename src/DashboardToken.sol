@@ -16,7 +16,7 @@ import "./interface/IBlockTrekker.sol";
  *
  * TODO: MerkleDrop addresses
  */
-abstract contract DashboardToken is IDashboardToken {
+contract DashboardToken is IDashboardToken {
     /// CONSTRUCTOR ///
 
     /**

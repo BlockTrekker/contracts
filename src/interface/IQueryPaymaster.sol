@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title IQueryPayments
+ * @title IQueryPaymaster
  * @dev BlockTrekker query payment rails (how users pay for queries)
  * @notice uses centralized debiting mechanic, advanced state channel architecture in future
  */
-abstract contract IQueryPayments is Ownable {
+abstract contract IQueryPaymaster is Ownable {
     /// EVENTS ///
     event Deposited(address indexed _from, uint256 indexed _amount);
     event Debited(address indexed _from, uint256 indexed _amount);
@@ -35,7 +35,6 @@ abstract contract IQueryPayments is Ownable {
     /**
      * Deposit USDC tokens to pay for BlockTrekker queries
      * @dev transfers payment tokens directly to treasury without possibility of refund/ withdrawal
-     * @dev deposits limited to $10 to limit damange to users from negligence/ malice by any counterparty
      *
      * @param _amount - the amount of USDC tokens to deposit
      */
@@ -43,7 +42,7 @@ abstract contract IQueryPayments is Ownable {
 
     /**
      * Debit value from a BlockTrekker account to reflect payment for queries on backend
-     * @dev modifier onlyAdmin
+     * @dev modifier onlyOwner, queryBalance
      * @notice Admin will debit many queries in one (ex $0.23 + $1.24 + $.74 = debit of $2.21)
      * @notice centralied, improvements todo
      *
@@ -53,7 +52,7 @@ abstract contract IQueryPayments is Ownable {
     function debit(address _from, uint256 _amount) public virtual;
 
     /// VIEWS ///
-    
+
     /**
      * Return the address for USDC used to compensate creators and the platform
      *
