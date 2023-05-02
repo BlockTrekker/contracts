@@ -1,132 +1,87 @@
 // SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interface/IBlockTrekker.sol";
+import "./interface/IDashboardToken.sol";
+import "./interface/IQueryPaymaster.sol";
 
-
-pragma solidity >=0.7.0 <0.9.0;
-
-/** 
+/**
  * @title BlockTrekker
  * @dev BlockTrekker subscription contract
- * @notice uses centralized debiting mechanic, contract only serves as payment processor in alpha
  */
-contract BlockTrekker {
-
-    /// EVENTS ///
-
-    event Deposited(address indexed _from, uint256 indexed _amount);
-    event Debited(address indexed _from, uint256 indexed _amount);
-    event TreasuryChanged(address indexed _to);
-    event AdminChanged(address indexed _to);
-
-    /// VARIABLES ///
-
-    // treasury and admin can be the same or different depending on risk profile
-    address public treasury; // address that receives tokens from a subcription transfer
-    address public admin; // address permissioned to call administrative functions
-    address public usdc; // address of the deployed ERC20 contract for USDC
-
-    uint256 public constant DECIMALS = 10**6; // 6 decimal places on USDC
-
-    mapping(address => uint256) public balances; // map address to query balance
-
-    /// MODIFIERS ///
+contract BlockTrekker is IBlockTrekker {
+    /// CONSTRUCTOR ///
 
     /**
-     * Requires that a function is called by the administrator address
+     * Deploy a new BlockTrekker administration contract
+     * @dev deploy BlockTrekker.sol -> deploy DashboardToken.sol & QueryPaymaster.sol -> call initialize() with dashboard & paymaster addresses
+     *
+     * @param _usdc - address of the deployed USDC contract to use as a payment medium in the BlockTrekker ecosystem
+     * @param _treasury - address of the treasury to receive subscription payments
+     * @param _feeBP - fee basis points taken from dashboard token mints
      */
-    modifier onlyAdmin() {
-        require(msg.sender == admin, "!admin");
-        _;
-    }
-
-    /// CONSTURCTOR ///
-
-    /** 
-     * @dev Creates a new smart contract for managing subscriptions
-     * @param _treasury - address to send USDC tokens to
-     * @param _admin - address allowed to administrate the smart contract
-     * @param _usdc - address of payment token to use (USDC)
-     */
-    constructor(address _treasury, address _admin, address _usdc) {
-        treasury = _treasury;
-        admin = _admin;
+    constructor(address _usdc, address _treasury, uint16 _feeBP) {
+        // set the USDC token address
         usdc = _usdc;
+        // set the treasury address
+        treasury = _treasury;
+        // set the fee basis points
+        feeBP = _feeBP;
     }
 
     /// FUNCTIONS ///
 
-    /**
-     * Deposit USDC tokens to pay for BlockTrekker queries
-     * @dev transfers payment tokens directly to treasury without possibility of refund/ withdrawal
-     * @dev deposits limited to $10 to limit damange to users from negligence/ malice by any counterparty
-     * 
-     * @param _amount - the amount of USDC tokens to deposit 
-     */
-    function deposit(uint256 _amount) public {
-        // ensure depositor does not exceed test contract limit for safety reasons
-        require(_amount >= 10 * DECIMALS, "DepositLimit");
-        // transfer payment tokens to treasury address or revert if failure
-        require(IERC20(usdc).transferFrom(msg.sender, treasury, _amount), "!AffordDeposit");
-        // update BlockTrekker balance with deposited value
-        // @notice 10 USDC limit can be circumvented by calling many times, but why would you do that
-        balances[msg.sender] = balances[msg.sender] + _amount;
-        // log the deposit in an event
-        emit Deposited(msg.sender, _amount);
+    function initialize(
+        address _dashboardToken,
+        address _queryPayments
+    ) public override onlyOwner {
+        // check that the contract has not already been initialized
+        require(!initialized, "Initialized");
+        // store the addresses for ecosystem contracts
+        dashboardToken = _dashboardToken;
+        queryPayments = _queryPayments;
+        // set the contract as initialized
+        initialized = true;
+        // emit the initialization event
+        emit Initialized(_dashboardToken, _queryPayments);
     }
 
-    /**
-     * Debit value from a BlockTrekker account to reflect payment for queries on backend
-     * @dev modifier onlyAdmin
-     * @notice Admin will debit many queries in one (ex $0.23 + $1.24 + $.74 = debit of $2.21)
-     * @notice this is the centralized point of failure where we couuld steal deposits. This is why deposits are
-     *         limited to 10 USDC. Future improvements will use ZK TLS Notarization to prove debit correctness
-     *
-     * @param _from - the BlockTrekker account to debit value from
-     * @param _amount - the amount of tokens to debit from the account
-     */
-    function debit(address _from, uint256 _amount) public onlyAdmin {
-        // ensure the account being debited has a sufficient internal balance
-        require(canAfford(_from, _amount), "!AffordDebit");
-        // update BlockTrekker balances with debited value
-        balances[_from] = balances[_from] - _amount;
-        // log the debit in an event
-        emit Debited(_from, _amount);
-    }
-
-    /**
-     * Change the recipient address for the proceeds of BlockTrekker subscriptions
-     * @dev modifier onlyAdmin
-     *
-     * @param _to - the address to set as the new treasury
-     */
-    function changeTreasury(address _to) public onlyAdmin {
+    function changeTreasury(address _to) public override onlyOwner {
         treasury = _to;
         emit TreasuryChanged(_to);
     }
 
-    /**
-     * Change the address allowed to administrate the BlockTrekker contract
-     * @dev modifier onlyAdmin
-     *
-     * @param _to - the address to set as the new admin
-     */
-    function changeAdmin(address _to) public onlyAdmin {
-        admin = _to;
-        emit AdminChanged(_to);
+    function changeFeeBP(uint16 _feeBP) public override onlyOwner {
+        feeBP = _feeBP;
+        emit FeeBPChanged(_feeBP);
     }
 
-    /// VIEWS ///
-
-    /**
-     * Evaluate whether or not a given BlockTrekker query account has sufficient balance for a debit value
-     *
-     * @param _from - address being queried for balance
-     * @param _amount - the amount of tokens the address must have to return true
-     * @return - true if BlockTrekker balance is sufficient for proposed debit value, and false otherwise
-     */
-    function canAfford(address _from, uint256 _amount) public view returns (bool) {
-        return balances[_from] >= _amount;
+    function addWhitelister(address _whitelister) public override onlyOwner {
+        whitelisters[_whitelister] = true;
+        emit WhitelisterAdded(_whitelister);
     }
-    
+
+    function removeWhitelister(address _whitelister) public override onlyOwner {
+        whitelisters[_whitelister] = false;
+        emit WhitelisterRemoved(_whitelister);
+    }
+
+    function addDebitor(address _debitor) public override onlyOwner {
+        debitors[_debitor] = true;
+        emit DebitorAdded(_debitor);
+    }
+
+    function removeDebitor(address _debitor) public override onlyOwner {
+        debitors[_debitor] = false;
+        emit DebitorRemoved(_debitor);
+    }
+
+    function addCreator(address _creator) public override onlyWhitelister {
+        IDashboardToken(dashboardToken).addCreator(_creator);
+    }
+
+    function debit(address _from, uint256 _amount) public override onlyDebitor {
+        IQueryPaymaster(queryPayments).debit(_from, _amount);
+    }
 }

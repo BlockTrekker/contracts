@@ -25,7 +25,7 @@ abstract contract QueryPaymaster is IQueryPaymaster {
     function deposit(uint256 _amount) public override {
         // transfer payment tokens directly to treasury address or revert if failure
         require(
-            IERC20(usdc).transferFrom(msg.sender, treasury, _amount),
+            IERC20(usdc()).transferFrom(msg.sender, treasury(), _amount),
             "!AffordDeposit"
         );
         // update creator query balance with deposited value

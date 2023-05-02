@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.16;
 
 import "./interface/IDashboardToken.sol";
@@ -22,9 +22,10 @@ contract DashboardToken is IDashboardToken {
     /**
      * Initialize the dashboard token contract and point ownership at the BlockTrekker admin contract
      *
+     * @param _uri - the base URI for the ERC1155 token
      * @param _blocktrekker - address of the BlockTrekker admin contract
      */
-    constructor(address _blocktrekker) {
+    constructor(string memory _uri, address _blocktrekker) ERC1155(_uri) {
         // set ownership over contract to be the BlockTrekker admin contract
         transferOwnership(_blocktrekker);
     }
