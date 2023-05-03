@@ -9,7 +9,7 @@ import "./interface/IBlockTrekker.sol";
  * @dev BlockTrekker query payment rails (how users pay for queries)
  * @notice uses centralized debiting mechanic, advanced state channel architecture in future
  */
-abstract contract QueryPaymaster is IQueryPaymaster {
+contract QueryPaymaster is IQueryPaymaster {
     /// CONSTRUCTOR ///
     /**
      * Initialize the query paymaster contract and point ownership at the BlockTrekker admin contract

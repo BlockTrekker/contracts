@@ -6,7 +6,12 @@ BlockTrekker on-chain contract ecosystem
 ### Testing
 TODO
 ### Deployment
-TODO
+
+Deploy the smart contract to the Sepolia Testnet:
+```
+source .env
+forge script script/deploy.s.sol:DeployBlockTrekker --broadcast --verify -vvvv --rpc-url https://sepolia.infura.io/v3/$INFURA_KEY
+```
 ## Contracts
 
 ### BlockTrekker.sol
