@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "forge-std/Script.sol";
 import "../src/BlockTrekker.sol";
@@ -28,7 +28,7 @@ contract DeployBlockTrekker is Script {
         QueryPaymaster qp = new QueryPaymaster(address(bt));
         DashboardToken dt = new DashboardToken(tokenURI, address(bt));
         // Initialize ecosystem contracts with admin contract
-        bt.initialize(address(qp), address(dt));
+        bt.initialize(address(dt), address(qp));
         vm.stopBroadcast();
     }
 }
