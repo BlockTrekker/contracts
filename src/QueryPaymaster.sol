@@ -3,6 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./interface/IQueryPaymaster.sol";
 import "./interface/IBlockTrekker.sol";
+import "./storage/BlockTrekkerStorage.sol";
+
 
 /**
  * @title QueryPaymaster
@@ -23,13 +25,15 @@ contract QueryPaymaster is IQueryPaymaster {
 
     /// FUNCTIONS ///
     function deposit(uint256 _amount) public override {
+        // get layout struct
+        QueryPaymasterStorage.Layout storage l = QueryPaymasterStorage.layout();
         // transfer payment tokens directly to treasury address or revert if failure
         require(
             IERC20(usdc()).transferFrom(msg.sender, treasury(), _amount),
             "!AffordDeposit"
         );
         // update creator query balance with deposited value
-        balances[msg.sender] = balances[msg.sender] + _amount;
+        l.balances[msg.sender] = l.balances[msg.sender] + _amount;
         // log the deposit in an event
         emit Deposited(msg.sender, _amount);
     }
@@ -38,8 +42,10 @@ contract QueryPaymaster is IQueryPaymaster {
         address _from,
         uint256 _amount
     ) public override queryBalance(_from, _amount) onlyOwner {
+         // get layout struct
+        QueryPaymasterStorage.Layout storage l = QueryPaymasterStorage.layout();
         // update creator query balance with debited value
-        balances[_from] = balances[_from] - _amount;
+        l.balances[_from] -= _amount;
         // log the debit in an event
         emit Debited(_from, _amount);
     }
@@ -47,10 +53,10 @@ contract QueryPaymaster is IQueryPaymaster {
     /// VIEWS ///
 
     function usdc() public view override returns (address) {
-        return IBlockTrekker(owner()).usdc();
+        return BlockTrekkerStorage.layout().usdc;
     }
 
     function treasury() public view override returns (address) {
-        return IBlockTrekker(owner()).treasury();
+        return BlockTrekkerStorage.layout().treasury;
     }
 }

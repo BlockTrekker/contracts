@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "solidstate-solidity/access/ownable/Ownable.sol";
+import "../storage/QueryPaymasterStorage.sol";
 
 /**
  * @title IQueryPaymaster
@@ -14,9 +15,6 @@ abstract contract IQueryPaymaster is Ownable {
     event Deposited(address indexed _from, uint256 indexed _amount);
     event Debited(address indexed _from, uint256 indexed _amount);
 
-    /// VARIABLES ///
-    mapping(address => uint256) public balances; // map address to query balance
-
     /// MODIFIERS ///
 
     /**
@@ -26,7 +24,7 @@ abstract contract IQueryPaymaster is Ownable {
      * @param _amount - the amount of tokens the address must have to return true
      */
     modifier queryBalance(address _from, uint256 _amount) {
-        require(balances[_from] >= _amount, "!Afford");
+        require(QueryPaymasterStorage.layout().balances[_from] >= _amount, "!Afford");
         _;
     }
 

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "solidstate-solidity/access/ownable/Ownable.sol";
+import "../storage/BlockTrekkerStorage.sol";
 
 /**
  * @title IBlockTrekker
@@ -18,25 +19,13 @@ abstract contract IBlockTrekker is Ownable {
     event DebitorAdded(address indexed _debitor); // debitor address added
     event DebitorRemoved(address indexed _debitor); // debitor address removed
 
-    /// VARIABLES ///
-    address public treasury; // address that receives tokens from a subcription transfer
-    address public usdc; // address of the deployed ERC20 contract for USDC
-    address public dashboardToken; // address of the deployed dashboard token contract
-    address public queryPayments; // address of the deployed query payments contract
-    uint16 public feeBP; // fee basis points taken from dashboard token mints
-    bool public initialized; // toggle to ensure initialization of smart contracts
-
-    /// MAPPINGS ///
-    mapping(address => bool) public whitelisters; // map of addressess that can whitelist creators in dashboard token contract
-    mapping(address => bool) public debitors; // map of addresses that can debit query balances in query payments contract
-
     /// MODIFIERS ///
 
     /**
      * Only allow whitelister addresses to call the addCreator function in token contract
      */
     modifier onlyWhitelister() {
-        require(whitelisters[msg.sender], "!Whitelister");
+        require(BlockTrekkerStorage.layout().whitelisters[msg.sender], "!Whitelister");
         _;
     }
 
@@ -44,7 +33,7 @@ abstract contract IBlockTrekker is Ownable {
      * Only allow debitor addresses to call the debit function in payment contract
      */
     modifier onlyDebitor() {
-        require(debitors[msg.sender], "!Debitor");
+        require(BlockTrekkerStorage.layout().debitors[msg.sender], "!Debitor");
         _;
     }
 

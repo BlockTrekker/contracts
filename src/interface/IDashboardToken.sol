@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "solidstate-solidity/access/ownable/Ownable.sol";
+import "solidstate-solidity/token/ERC1155/base/ERC1155Base.sol";
+import "../storage/DashboardTokenStorage.sol";
 
 /**
  * Dashboard Tokens are issued by
@@ -17,33 +18,12 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
  *
  * TODO: MerkleDrop addresses
  */
-abstract contract IDashboardToken is Ownable, ERC1155 {
+abstract contract IDashboardToken is Ownable, ERC1155Base {
     /// EVENTS ///
     event CreatorAdded(address indexed _creator); // admin whitelisted a creator address to issue new dashboard tokens
     event TokenAdded(uint256 indexed _tokenNonce); // creator made a new dashboard access NFT
     event TokenMinted(uint256 indexed _tokenNonce, address indexed _minter); // user minted a dashboard access NFT
     event TokenPriceUpdated(uint256 indexed _tokenNonce); // creator changed the price to mint a dashboard access NFT
-
-    /// VARIABLES ///
-    uint16 public platformFeeBP; // platform fee paid to admin treasury on
-    uint256 public tokenNonce; // number of unique token types created in ERC1155 contract
-
-    /// MAPPINGS ///
-    mapping(address => Creator) public creators; // map creator addresses to their state
-    mapping(uint256 => Token) public tokens; // map global token id to dashboard state
-
-    /// STRUCTS ///
-    struct Creator {
-        bool auth; // toggle by admin that allows a creator to build tokens
-        uint16 nonce; // defines the dashboard token nonce for a given dashboard creator (65535 per creator)
-        mapping(uint16 => uint256) tokens; // map of incremental creator dashboard nonce to global erc1155 token id
-    }
-
-    struct Token {
-        address creator; // the creator that issued a token
-        uint16 nonce; // the creator nonce that identifies token within domain of creator
-        uint256 price; // the price in USDC to mint the ERC1155 token
-    }
 
     /// MODIFIERS ///
 
@@ -51,7 +31,7 @@ abstract contract IDashboardToken is Ownable, ERC1155 {
      * Only allow whitelisted creator addresses to call a given function
      */
     modifier anyCreator() {
-        require(creators[msg.sender].auth, "!Creator");
+        require(DashboardTokenStorage.layout().creators[msg.sender].auth, "!Creator");
         _;
     }
 
@@ -61,7 +41,7 @@ abstract contract IDashboardToken is Ownable, ERC1155 {
      * @param _token - tokenId to check for creator membership
      */
     modifier onlyCreator(uint256 _token) {
-        require(msg.sender == tokens[_token].creator, "!TokenCreator");
+        require(msg.sender == DashboardTokenStorage.layout().tokens[_token].creator, "!TokenCreator");
         _;
     }
 

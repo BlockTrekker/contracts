@@ -9,3 +9,7 @@
 	path = lib/solidstate-solidity
 	url = https://github.com/solidstate-network/solidstate-solidity
 	branch = v0.0.56
+[submodule "lib/diamond-3"]
+	path = lib/diamond-3
+	url = https://github.com/mudgen/diamond-3
+	branch = v1.5.0
