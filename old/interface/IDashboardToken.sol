@@ -59,8 +59,7 @@ abstract contract IDashboardToken is Ownable, ERC1155Base {
 
     /**
      * Whitelist a new creator that can create dashboard tokens on the platform
-     * @dev modifier onlyOwner() - only the owner of the contract can call this function
-     * @notice no check on re-whitelisting addresses since the consequences are minimal
+     * @dev modifier onlyWhitelister() - only whitelister can call this function
      *
      * @param _creator - address of the organization
      */

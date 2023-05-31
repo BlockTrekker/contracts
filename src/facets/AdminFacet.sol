@@ -17,7 +17,17 @@ contract AdministrationFacet {
     event FeeBPChanged(uint16 _feeBP); // fee basis points updated
     event WhitelisterAdded(address indexed _whitelister); // whitelister address added
     event WhitelisterRemoved(address indexed _whitelister); // whitelister address removed
+    event CreatorAdded(address indexed _creator); // admin whitelisted a creator address to issue new dashboard tokens
 
+    /// MODIFIERS ///
+
+    /**
+     * Only allow whitelister addresses to call the addCreator function in token contract
+     */
+    modifier onlyWhitelister() {
+        require(s.whitelisters[msg.sender], "!Whitelister");
+        _;
+    }
 
     /// FUNCTIONS ///
 
@@ -59,5 +69,18 @@ contract AdministrationFacet {
         } else {
             emit WhitelisterRemoved(_whitelister);
         }
+    }
+
+    /**
+     * Whitelist a new creator that can create dashboard tokens on the platform
+     * @dev modifier onlyWhitelister() - only whitelister can call this function
+     *
+     * @param _creator - address of the organization
+     */
+    function addCreator(address _creator) external onlyWhitelister {
+        // add the creator to the whitelist
+        s.creators[_creator].auth = true;
+        // log the creator addition event
+        emit CreatorAdded(_creator);
     }
 }

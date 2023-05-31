@@ -2,12 +2,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../libraries/AppStorage.sol";
+import "../interfaces/IERC20.sol";
 import "diamond-3/libraries/LibDiamond.sol";
 
 
-interface IERC20 {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
+
 
 // =============================================================
 //                      PAYMASTER V1
