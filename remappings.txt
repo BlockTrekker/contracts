@@ -1,5 +1,2 @@
-@openzeppelin/=lib/openzeppelin-contracts/
-diamond-3/=lib/diamond-3/contracts/
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
-solidstate-solidity/=lib/solidstate-solidity/contracts/
