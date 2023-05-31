@@ -27,13 +27,17 @@ struct AppStorage {
     // map of addressess that can whitelist creators in dashboard token contract
     mapping(address => bool) whitelisters;
     // =============================================================
-    //                            STORAGE V1
+    //                            TOKEN V1
     // =============================================================
+    // ERC1155 token standard storage
+    mapping(uint256 => mapping(address => uint256)) balances;
+    mapping(address => mapping(address => bool)) operatorApprovals;
     // number of unique token types created in ERC1155 contract
     uint256 tokenNonce;
     // map creator addresses to their state
     mapping(address => Creator) creators;
     // map global token id to dashboard state
     mapping(uint256 => Token) tokens;
+
 }
 

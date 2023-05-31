@@ -1,7 +1,15 @@
+# [submodule "lib/openzeppelin-contracts"]
+# 	path = lib/openzeppelin-contracts
+# 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+# 	branch = v4.8.3
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/diamond-3"]
+	path = lib/diamond-3
+	url = https://github.com/mudgen/diamond-3
+	branch = v1.5.0
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 	branch = v4.8.3
-[submodule "lib/forge-std"]
-	path = lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
