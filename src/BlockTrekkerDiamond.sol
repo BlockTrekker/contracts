@@ -2,7 +2,6 @@
 pragma solidity >=0.7.0 < 0.9.0;
 pragma experimental ABIEncoderV2;
 
-
 import "diamond-3/libraries/LibDiamond.sol";
 import "diamond-3/interfaces/IDiamondLoupe.sol";
 import "diamond-3/interfaces/IDiamondCut.sol";
@@ -11,13 +10,13 @@ import "diamond-3/interfaces/IERC173.sol";
 import "./libraries/AppStorage.sol";
 
 contract BlockTrekkerDiamond {
-    
     AppStorage s;
 
     struct DiamondArgs {
         address owner;
         address treasury;
         address usdc;
+        uint16 feeBP;
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, DiamondArgs memory _args) payable {
@@ -26,7 +25,10 @@ contract BlockTrekkerDiamond {
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
-        // set constructor storage 
+        // set constructor storage
+        s.treasury = _args.treasury;
+        s.usdc = _args.usdc;
+        s.feeBP = _args.feeBP;
 
         // adding ERC165 data
         ds.supportedInterfaces[type(IERC165).interfaceId] = true;
@@ -34,7 +36,9 @@ contract BlockTrekkerDiamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-
+        // erc1155 compatibility
+        ds.supportedInterfaces[0xd9b67a26] = true;
+        // erc1155 metadata compatibility
     }
 
     // Find facet for function that is called and execute the
@@ -52,12 +56,8 @@ contract BlockTrekkerDiamond {
             let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
             switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
         }
     }
 

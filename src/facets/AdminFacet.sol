@@ -8,7 +8,7 @@ import "diamond-3/libraries/LibDiamond.sol";
 //                      ADMINISTRATION V1
 //  Administrative access to BlockTrekker contract ecosystem
 // =============================================================
-contract AdministrationFacet {
+contract AdminFacet {
     AppStorage internal s;
 
     /// EVENTS ///

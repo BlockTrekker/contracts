@@ -11,7 +11,7 @@ import "diamond-3/libraries/LibDiamond.sol";
 //                      DASHBOARDTOKEN V1
 //  ERC1155 Token that gates access to BlockTrekker Dashboards
 // =============================================================
-contract DashboardToken is IERC1155 {
+contract DashboardTokenFacet is IERC1155 {
     AppStorage internal s;
     bytes4 internal constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
     bytes4 internal constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).

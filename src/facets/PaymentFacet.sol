@@ -12,7 +12,7 @@ import "diamond-3/libraries/LibDiamond.sol";
 //                      PAYMASTER V1
 //  Paymaster for onchain payments for BlockTrekker queries
 // =============================================================
-contract AdministrationFacet {
+contract PaymentFacet {
     AppStorage internal s;
 
     /// EVENTS ///
