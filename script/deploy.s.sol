@@ -84,7 +84,7 @@ contract DeployBlockTrekker is Script, Helper {
             feeBP: feeBP
         });
 
-        BlockTrekkerDiamond diamond = new BlockTrekkerDiamond(cut, args);
+        new BlockTrekkerDiamond(cut, args);
 
         vm.stopBroadcast();
     }

@@ -25,6 +25,7 @@ contract PaymentFacet {
      * @param _amount - the amount of USDC tokens to deposit
      */
     function deposit(uint256 _amount) external {
+
         require(IERC20(s.usdc).transferFrom(msg.sender, s.treasury, _amount), "!Deposit");
         emit Deposited(msg.sender, _amount);
     }

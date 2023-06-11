@@ -26,6 +26,7 @@ contract BlockTrekkerDiamond {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
         // set constructor storage
+
         s.treasury = _args.treasury;
         s.usdc = _args.usdc;
         s.feeBP = _args.feeBP;

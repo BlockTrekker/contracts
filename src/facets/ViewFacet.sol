@@ -84,15 +84,15 @@ contract ViewFacet {
      * Get the tokens issued by a given creator
      *
      * @param _creator - the address of the creator to get tokens for
-     * @return - an array of token ids issued by the creator
+     * @return _tokenIds - an array of token ids issued by the creator
      */
-    function getCreator(address _creator) external view returns (uint256[] memory) {
+    function getCreator(address _creator) external view returns (uint256[] memory _tokenIds) {
         // get creator from storage
         uint16 nonce = s.creators[_creator].nonce;
-        uint256[] memory tokenIds = new uint256[](nonce);
+        _tokenIds = new uint256[](nonce);
         // build array of token ids issued by the creator
         for (uint16 i = 1; i <= nonce; i++) {
-            tokenIds[i] = s.creators[_creator].tokens[i];
+            _tokenIds[i] = s.creators[_creator].tokens[i];
         }
     }
 
