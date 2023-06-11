@@ -12,7 +12,6 @@ contract AdminFacet {
     AppStorage internal s;
 
     /// EVENTS ///
-    event Initialized(address _dashboardToken, address _queryPaymaster); // initialized control over ecosystem contracts
     event TreasuryChanged(address indexed _to); // treasury address updated
     event FeeBPChanged(uint16 _feeBP); // fee basis points updated
     event WhitelisterAdded(address indexed _whitelister); // whitelister address added

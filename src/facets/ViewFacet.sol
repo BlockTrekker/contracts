@@ -71,6 +71,16 @@ contract ViewFacet {
     }
 
     /**
+     * Determine if a given address is enrolled as a BlockTrekker creator
+     *
+     * @param _account - the address to check for creator permission
+     * @return - true if the address is a creator, false otherwise
+     */
+    function isCreator(address _account) external view returns (bool) {
+        return s.creators[_account].auth;
+    }
+
+    /**
      * Get the tokens issued by a given creator
      *
      * @param _creator - the address of the creator to get tokens for
