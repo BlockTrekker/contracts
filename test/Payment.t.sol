@@ -15,8 +15,8 @@ import "./Helper.sol";
 import "./USDC.sol";
 
 contract PaymentFacetTest is Test, Helper {
-    /// EVENTS ///
-    event Deposited(address _from, uint256 _amount); // a query payment was made to the treasury
+    // events
+    event Deposited(address _from, uint256 _amount);
 
     // facet contracts
     DiamondCutFacet dCutF;
@@ -94,7 +94,6 @@ contract PaymentFacetTest is Test, Helper {
         assertEq(usdc.balanceOf(address(msg.sender)), 0);
 
         // create conditions for usdc to be deposited via contract
-        vm.prank(address(0xdead));
         usdc.mint(address(0xdead), amount);
         vm.prank(address(0xdead));
         usdc.approve(address(diamond), amount);

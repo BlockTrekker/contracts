@@ -50,18 +50,6 @@ contract ViewFacet {
     }
 
     /**
-     * Returns the balance of a given account for a given ERC1155 token id
-     *
-     * @param _account - the address to check the balance of
-     * @param _id - the token id to check the balance of
-     * @return - the balance of the account for the given token id
-     */
-    function getBalance(address _account, uint256 _id) external view returns (uint256) {
-        return s.balances[_id][_account];
-    }
-
-
-    /**
      * Return the total number of ERC1155 dashboard tokens issued
      *
      * @return - the total number of ERC1155 dashboard tokens issued
@@ -92,7 +80,7 @@ contract ViewFacet {
         _tokenIds = new uint256[](nonce);
         // build array of token ids issued by the creator
         for (uint16 i = 1; i <= nonce; i++) {
-            _tokenIds[i] = s.creators[_creator].tokens[i];
+            _tokenIds[i - 1] = s.creators[_creator].tokens[i];
         }
     }
 
