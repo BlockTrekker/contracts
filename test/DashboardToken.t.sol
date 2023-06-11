@@ -138,6 +138,56 @@ contract DashboardTokenFacetTest is Test, Helper {
         assertEq(t.price, 10000000);
     }
 
+    function testAddTokenCreatorArr() public {
+        // add a second creator
+        vm.prank(address(msg.sender));
+        AdminFacet(address(diamond)).addCreator(address(0xeeee));
+
+        // create tokens 1 and 2 to 0xdead
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(10000000);
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(5000000);
+
+        // create token 3 to 0xeeee
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).addToken(7500000);
+
+        // // create token 4 to 0xdead
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(10000000);
+
+        // // create tokens 5, 6, and 7 to 0xee
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).addToken(10000000);
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).addToken(5000000);
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).addToken(7500000);
+
+        // get creator token arrays
+        uint256[] memory tokens1 = ViewFacet(address(diamond)).getCreator(address(0xdead));
+        uint256[] memory tokens2 = ViewFacet(address(diamond)).getCreator(address(0xeeee));
+
+        // expect creator 0xdead to have 3 tokens
+        assertEq(tokens1.length, 3);
+
+        // expect creator 0xeeee to have 4 tokens
+        assertEq(tokens2.length, 4);
+
+        // expect creator 0xdead to have token array = [1, 2, 4]
+        uint256[3] memory expected1 = [uint256(1), 2, 4];
+        for (uint256 i = 0; i < expected1.length; i++) {
+            assertEq(tokens1[i], expected1[i]);
+        }
+
+        // expect creator 0xeeee to have token array = [3, 5, 6, 7]
+        uint256[4] memory expected2 = [uint256(3), 5, 6, 7];
+        for (uint256 i = 0; i < expected2.length; i++) {
+            assertEq(tokens2[i], expected2[i]);
+        }
+    }
+
     function testMintToken() public {
         // compute usdc transfer amonunts
         uint256 amount = 10000000;
@@ -177,29 +227,85 @@ contract DashboardTokenFacetTest is Test, Helper {
         assertEq(DashboardTokenFacet(address(diamond)).balanceOf(address(0xeeee), 1), 1);
     }
 
-    function testMintTokenUniqueHolder() public {}
+    function testMintTokenUniqueHolder() public {
+        uint256 amount = 10000000;
 
-    function testMintTokenInsufficientBalance() public {}
+        // mint value to the token buyer
+        usdc.mint(address(0xeeee), amount);
+        vm.prank(address(0xeeee));
+        usdc.approve(address(diamond), amount);
 
-    // function testDeposit() public {
-    //     uint256 amount = 100000000;
+        // create a new token
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(amount);
 
-    //     // check that treasury is empty
-    //     assertEq(usdc.balanceOf(address(msg.sender)), 0);
+        // mint a new token
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).mintToken(1);
 
-    //     // create conditions for usdc to be deposited via contract
-    //     vm.prank(address(0xdead));
-    //     usdc.mint(address(0xdead), amount);
-    //     vm.prank(address(0xdead));
-    //     usdc.approve(address(diamond), amount);
+        // try to mint the same token while already holding it
+        vm.expectRevert(bytes("!UniqueHolder"));
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).mintToken(1);
+    }
 
-    //     // deposit fundss
-    //     vm.expectEmit(true, true, false, true);
-    //     emit Deposited(address(0xdead), amount);
-    //     vm.prank(address(0xdead));
-    //     PaymentFacet(address(diamond)).deposit(amount);
+    function testMintTokenInsufficientBalance() public {
+        uint256 amount = 9500000;
 
-    //     // // check that treasury recieved funds
-    //     assertEq(usdc.balanceOf(address(msg.sender)), amount);
-    // }
+        // mint insufficient balance to the token buyer
+        usdc.mint(address(0xeeee), amount);
+        vm.prank(address(0xeeee));
+        usdc.approve(address(diamond), amount);
+
+        // create a new token
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(10000000);
+
+        // try to mint a new token
+        vm.expectRevert(bytes("!AffordMint"));
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).mintToken(1);
+    }
+
+    function testChangePriceRBA() public {
+        // create a new token
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(10000000);
+
+        // expect a non-creator address cannot change the price
+        vm.expectRevert(bytes("!TokenCreator"));
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).changePrice(1, 5000000);
+
+        // enroll 0xeeee as a creator
+        vm.prank(address(msg.sender));
+        AdminFacet(address(diamond)).addCreator(address(0xdead));
+
+        // expect creator that did not issue the token cannot change the price
+        vm.expectRevert(bytes("!TokenCreator"));
+        vm.prank(address(0xeeee));
+        DashboardTokenFacet(address(diamond)).changePrice(1, 5000000);
+
+        // expect token creator can change price
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).changePrice(1, 5000000);
+    }
+
+    function testChangePrice() public {
+        // create a new token
+        uint256 amount = 10000000;
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).addToken(amount);
+
+        // expect token price to be 10000000
+        assertEq(ViewFacet(address(diamond)).getToken(1).price, amount);
+
+        // change price to 5000000
+        amount = 5000000;
+        vm.prank(address(0xdead));
+        DashboardTokenFacet(address(diamond)).changePrice(1, amount);
+
+        // expect token price to be 5000000
+        assertEq(ViewFacet(address(diamond)).getToken(1).price, amount);
+    }
 }
