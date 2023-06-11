@@ -17,6 +17,7 @@ import "./USDC.sol";
 contract PaymentFacetTest is Test, Helper {
     // events
     event Deposited(address _from, uint256 _amount);
+    event Transfer(address indexed from, address indexed to, uint256 value); // ERC20
 
     // facet contracts
     DiamondCutFacet dCutF;
@@ -87,6 +88,7 @@ contract PaymentFacetTest is Test, Helper {
         diamond = new BlockTrekkerDiamond(cut, args);
     }
 
+    // ensure a payment can be made to the treasury for blocktrekker queries
     function testDeposit() public {
         uint256 amount = 100000000;
 
@@ -98,7 +100,9 @@ contract PaymentFacetTest is Test, Helper {
         vm.prank(address(0xdead));
         usdc.approve(address(diamond), amount);
 
-        // deposit fundss
+        // deposit funds
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(address(0xdead), msg.sender, amount);
         vm.expectEmit(true, true, false, true);
         emit Deposited(address(0xdead), amount);
         vm.prank(address(0xdead));

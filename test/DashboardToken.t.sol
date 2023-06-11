@@ -98,6 +98,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         AdminFacet(address(diamond)).addCreator(address(0xdead));
     }
 
+    // ensure only a token creator can create a new token
     function testAddTokenRBA() public {
         // expect a non-creator address cannot create a new token
         vm.expectRevert(bytes("!Creator"));
@@ -110,6 +111,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         DashboardTokenFacet(address(diamond)).addToken(10000000);
     }
 
+    // ensure a creator can create a new dashboard token and store metadata
     function testAddToken() public {
         // expect global token nonce to be 0
         assertEq(ViewFacet(address(diamond)).getNumTokens(), 0);
@@ -138,6 +140,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         assertEq(t.price, 10000000);
     }
 
+    // ensure that a creator properly stores references to the global ids of their own tokens
     function testAddTokenCreatorArr() public {
         // add a second creator
         vm.prank(address(msg.sender));
@@ -188,6 +191,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         }
     }
 
+    // ensure that a dashboard consumer can purchase a token and that the creator and treasury are paid
     function testMintToken() public {
         // compute usdc transfer amonunts
         uint256 amount = 10000000;
@@ -227,6 +231,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         assertEq(DashboardTokenFacet(address(diamond)).balanceOf(address(0xeeee), 1), 1);
     }
 
+    // ensure that a dashboard consumer cannot mint a token if they already hold it
     function testMintTokenUniqueHolder() public {
         uint256 amount = 10000000;
 
@@ -249,6 +254,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         DashboardTokenFacet(address(diamond)).mintToken(1);
     }
 
+    // ensure that a dashboard consumer cannot mint a token if they do not have enough USDC
     function testMintTokenInsufficientBalance() public {
         uint256 amount = 9500000;
 
@@ -267,6 +273,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         DashboardTokenFacet(address(diamond)).mintToken(1);
     }
 
+    // ensure that only a token's creator can mutate the mint price
     function testChangePriceRBA() public {
         // create a new token
         vm.prank(address(0xdead));
@@ -291,6 +298,7 @@ contract DashboardTokenFacetTest is Test, Helper {
         DashboardTokenFacet(address(diamond)).changePrice(1, 5000000);
     }
 
+    // ensure that a creator can update the mint price of one of their own tokens
     function testChangePrice() public {
         // create a new token
         uint256 amount = 10000000;

@@ -86,6 +86,7 @@ contract AdminFacetTest is Test, Helper {
         diamond = new BlockTrekkerDiamond(cut, args);
     }
 
+    // ensure only the contract owner can set a creator whitelister
     function testSetWhitelisterRBA() public {
         // check that wrong address cannot set a creator whitelister
         vm.prank(address(0xdead));
@@ -97,6 +98,7 @@ contract AdminFacetTest is Test, Helper {
         AdminFacet(address(diamond)).setWhitelister(address(0xdead), true);
     }
 
+    // check that a whitelister can be set and unset
     function testSetWhitelister() public {
         // expect address to not be enrolled as whitelister
         assertFalse(ViewFacet(address(diamond)).isWhitelisted(address(0xdead)));
@@ -120,6 +122,7 @@ contract AdminFacetTest is Test, Helper {
         assertFalse(ViewFacet(address(diamond)).isWhitelisted(address(0xdead)));
     }
 
+    // check that only a whitelister can add a creator
     function testAddCreatorRBA() public {
         // check that wrong address cannot set a creator whitelister
         vm.prank(address(0xdead));
@@ -135,6 +138,7 @@ contract AdminFacetTest is Test, Helper {
         AdminFacet(address(diamond)).addCreator(address(0xeeee));
     }
 
+    // check that a whitelister can add a creator, and that the creator shows as permissioned
     function testAddCreator() public {
         // add a whitelister
         vm.prank(msg.sender);
@@ -153,6 +157,7 @@ contract AdminFacetTest is Test, Helper {
         assertTrue(ViewFacet(address(diamond)).isCreator(address(0xeeee)));
     }
 
+    // check that only the contract owner can change the treasury address
     function testChangeTreasuryRBA() public {
         // check that wrong address cannot set a creator whitelister
         vm.prank(address(0xdead));
@@ -164,6 +169,7 @@ contract AdminFacetTest is Test, Helper {
         AdminFacet(address(diamond)).changeTreasury(address(0x00));
     }
 
+    // check that the treasury address can be updated so that funds arrive to the new address
     function testChangeTreasury() public {
         // expect treasury to be set to msg.sender
         assertEq(msg.sender, ViewFacet(address(diamond)).getTreasury());
@@ -178,6 +184,7 @@ contract AdminFacetTest is Test, Helper {
         assertEq(address(0xdead), ViewFacet(address(diamond)).getTreasury());
     }
 
+    // check that only the contract owner can change the platform fee in basis points
     function testChangeFeeBPRBA() public {
         // check that wrong address cannot set a creator whitelister
         vm.prank(address(0xdead));
@@ -189,6 +196,7 @@ contract AdminFacetTest is Test, Helper {
         AdminFacet(address(diamond)).changeFeeBP(100);
     }
 
+    // check that the platform fee in basis points charged on token mint can be updated
     function testChangeFeeBP() public {
         // expect treasury to be set to msg.sender
         assertEq(500, uint256(ViewFacet(address(diamond)).getFeeBP()));
@@ -203,6 +211,7 @@ contract AdminFacetTest is Test, Helper {
         assertEq(1500, uint256(ViewFacet(address(diamond)).getFeeBP()));
     }
 
+    // check that only the contract owner can change the owner of the contract
     function testTransferOwnershipRBA() public {
         // check that wrong address cannot set a creator whitelister
         vm.prank(address(0xdead));
@@ -214,6 +223,7 @@ contract AdminFacetTest is Test, Helper {
         OwnershipFacet(address(diamond)).transferOwnership(address(0xdead));
     }
 
+    // check that the contract owner can update the address that owns the contract
     function testTransferOwnership() public {
         // expect treasury to be set to msg.sender
         assertEq(msg.sender, OwnershipFacet(address(diamond)).owner());

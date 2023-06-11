@@ -27,10 +27,12 @@ contract DeployBlockTrekker is Script, Helper {
     }
 
     function run() public {
+        // get deployer key
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        // start broadcasting the deployment to the RPC
         vm.startBroadcast(privateKey);
 
-        //deploy facets and init contract
+        //deploy facet contracts storing logic used by BlockTrekker
         DiamondCutFacet dCutF = new DiamondCutFacet();
         DiamondLoupeFacet dLoupeF = new DiamondLoupeFacet();
         OwnershipFacet ownerF = new OwnershipFacet();
@@ -39,7 +41,7 @@ contract DeployBlockTrekker is Script, Helper {
         PaymentFacet paymentF = new PaymentFacet();
         ViewFacet viewF = new ViewFacet();
 
-        // bytes4[] memory q = generateSelectors("DiamondCutFacet");
+        // Define the facets used by the BlockTrekker DIamond
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](7);
         cut[0] = IDiamondCut.FacetCut({
             facetAddress: address(dCutF),
@@ -77,6 +79,7 @@ contract DeployBlockTrekker is Script, Helper {
             functionSelectors: generateSelectors("ViewFacet")
         });
 
+        // define the constructor arguments for the BlockTrekker diamond
         BlockTrekkerDiamond.DiamondArgs memory args = BlockTrekkerDiamond.DiamondArgs({
             owner: msg.sender,
             treasury: treasury,
@@ -84,8 +87,10 @@ contract DeployBlockTrekker is Script, Helper {
             feeBP: feeBP
         });
 
+        // deploy the blocktrekker diamond and initialize with the facets
         new BlockTrekkerDiamond(cut, args);
 
+        // finish broadcasting deployment and transactions to RPC
         vm.stopBroadcast();
     }
 }

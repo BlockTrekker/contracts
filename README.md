@@ -1,43 +1,53 @@
 # BlockTrekker Smart Contracts
-BlockTrekker on-chain contract ecosystem
+BlockTrekker on-chain contract ecosystem using ERC2535 to manage upgradability.
 
 ## Using the BlockTrekker Smart Contracts
 
 ### Testing
-TODO
+Unit tests for each facet are written in `./test/`.
+```
+forge test --ffi
+```
+The `--ffi` flag is required since a helper method is used to generate function selectors used in facet cuts.
+
 ### Deployment
-
 Deploy the smart contract to the Sepolia Testnet:
-```
-source .env
-forge script script/deploy.s.sol:DeployBlockTrekker --broadcast --verify -vvvv --rpc-url https://sepolia.infura.io/v3/$INFURA_KEY
-```
-## Contracts
 
-### BlockTrekker.sol
-`BlockTrekker.sol` is the admin smart contract that governs the other smart contracts.
- - Defines the `treasury` address where profits are sent
- - Defines the `feeBP` uint16 which defines the basis points (percentage) of mint fees taken by platform
- - Defines the `usdc` address which points to the USDC ERC20 facilitating query & token payments
- - Allows additional permissioning of `whitelisters` addresses which can call the admin contract to whitelist `creators` in `DashboardToken.sol` contract deployment
-    - this allows day-to-day low security function calls to be segregated from high-security calls like updating `treasury`, `feeBP`, or `tokenURI`
- - Allows additional permissioning of `debitors` addresses which can call the admin contract to debit tokens from `creators` in the `QueryPaymaster.sol` contract deployment
-    - this allows the segregation of debiting query costs from contract maintenance functions, meaning we can use a robotic backend for this functionality only
+```
+forge script script/deploy.s.sol:DeployBlockTrekker --broadcast --verify --ffi --rpc-url https://sepolia.infura.io/v3/$INFURA_KEY --etherscan-api-key $ETHERSCAN_KEY
+```
+Make sure you have an infura api key and etherscan api key. You can change the deploy script below according to the network you want to deploy to. The `--ffi` flag is required since a helper method is used to generate function selectors used in facet cuts.
 
-### DashboardToken.sol
-`DashboardToken.sol` is an ERC1155 token contract which allows dashboard creators to monetize their dashboards by token-gating access
- - Defines a whitelist set of `creators` who are allowed to create new NFTs on the BlockTrekker platform
-    - Called by `BlockTrekker.sol` contract by permissioned `whitelisters`
- - Allows `creators` to create new ERC1155 NFT tokens that gate access to dashboards & allow users to compensate them in USDC for a given `price`
- - Allows arbitrary contract callers to mint a `creator`'s NFT for a price in USDC
-    - Uses `feeBP` from `BlockTrekker.sol` to make a payment to `treasury` for platform to make a profit as `platformFee`
-    - Remaining value from `price - platformFee` to get `creatorFee` which is directly paid to creator when token is minted
- - Allows `creators` to change the mint price of their own tokens
-### QueryPaymaster.sol
-`QueryPaymaster.sol` is a contract that acts as a non-refundable wallet for `creators` to pay for their queries in the BlockTrekker app
- - `creators` can deposit USDC directly into the `QueryPaymaster.sol` smart contract
-    - note: `creators` do not need to be whitelisted as they are in `DashboardToken.sol` to deposit and use the query payment wallet
- - `admin` unilaterally debits from `creator` query wallet
-    - use the `debitors` permission set to debit
-    - this is not trustless or permissionless. True trustlessness will require TLS notarization 
-    - *TODO ASAP: add merkle tree for query receipts to at least provide onchain audit tools that can be cross-referenced with offchain receipts shown in web app*
+## Contract Descriptions
+ - `DiamondCutFacet.sol` is a standard ERC2535 facet that governs the logic of adding/ removing/ updating functionality from the diamond proxy
+ - `DiamondLoupeFacet.sol` is a standard ERC2535 facet that provides introspection into the facets & function selectors available from the diamond proxy
+ - `OwnershipFacet.sol` is a standard Diamond Facet used to manage ownership over contracts, and employs ERC173.
+   - Extended into `AdminFacet.sol` via `LibDiamond.enforceIsContractOwner()` to manage ownership functionality
+   - Allows the transfer of Ownership as shown in `./test/Admin.t.sol`
+ - `AdminFacet.sol` defines administrator logic for the smart contract.
+   - Contract owner can set "whitelisters" who are allowed to set creator roles (separates day-to-day actions from critical ownership actions)
+   - Whitelisters can set "creators" who are allowed to create new dashboard tokens through the `DashboardTokenFacet.sol` logic
+   - Contract owner can change the platform fee (`feeBP`) that is charged from dashboard token mints and paid to the treasury as profit
+   - Contract owner can change the `treasury` address that dashboard query deposits and token mint platform fees are paid to
+ - `PaymentFacet.sol` is a small base of logic for users to pay the treasury in USDC for BlockTrekker queries. There is no decentralization currently integrated and it simply allows an onchain payment rail (rather than Stripe, for example) with provable history of payment
+   - Anyone can `deposit` usdc directly to the treasury
+ - `DashboardTokenFacet.sol` is an ERC1155 with extra logic governing dashboard token minting
+   - All standard ERC1155 functionality is included
+   - Creators can `addToken` with a given mint price in USDC. The global id of the token maps to the dashboard on BlockTrekker backend and is used to tokengate a given dashboard
+   - Creators can `changePrice` of a given dashboard token that they creatred to update the price to access an already-deployed dashboard
+   - Any user can `mintToken` to purchase a dashboard token to gain access to a given dashboard. This will pay the creator the fee set for the token - the platform fee taken by the BlockTrekker smart contract
+      - A user can only mint a token once and will be prevented from minting multiple tokens since this is useless to them
+ - `ViewFacet.sol` provides visibility functions across the BlockTrekker ecosystem since Diamond storage does not support the traditionally created view calls that come with public variable declarations
+ - `BlockTrekkerDiamond.sol` is the ERC2535 Diamond Proxy contract that serves as an entry point for all facet functionality & houses all storage
+
+## Deployments
+
+### Sepolia
+ - `DiamondCutFacet.sol`: [`0x535656F02879C7cBBEE20Dc3aF4bE966E384AB7C`](https://sepolia.etherscan.io/address/0x535656F02879C7cBBEE20Dc3aF4bE966E384AB7C)
+ - `DiamondLoupeFacet.sol`: [`0xC01311dF54341B3eFD492004245361f2BA5C6FC9`](https://sepolia.etherscan.io/address/0xC01311dF54341B3eFD492004245361f2BA5C6FC9)
+ - `OwnershipFacet.sol`: [`0x87BC2911A50AD59845925fdD2009515213dc5a7c`](https://sepolia.etherscan.io/address/0x87BC2911A50AD59845925fdD2009515213dc5a7c)
+ - `AdminFacet.sol`: [`0x99aD6C509263c24BC9D5C0fe0EF89c83c4b3ba5d`](https://sepolia.etherscan.io/address/0x99aD6C509263c24BC9D5C0fe0EF89c83c4b3ba5d)
+ - `DashboardTokenFacet.sol`: [`0xb61ACbeE3685F4B8aE65ce5ab6a7d4f761419999`](https://sepolia.etherscan.io/address/0xb61ACbeE3685F4B8aE65ce5ab6a7d4f761419999)
+ - `PaymentFacet.sol`: [`0x0c57183B33bE7D3418a55a0717Aa034E11d127D2`](https://sepolia.etherscan.io/address/0x0c57183B33bE7D3418a55a0717Aa034E11d127D2)
+ - `ViewFacet.sol`: [`0x97AE9d7Ab03b7C0a3ef0dBE63a390dBd454F2D06`](https://sepolia.etherscan.io/address/0x97AE9d7Ab03b7C0a3ef0dBE63a390dBd454F2D06)
+ - `BlockTrekkerDiamond.sol`: [`0x01e3E47386C9357110aE0D05e2Dd28d841bBd3a1`](https://sepolia.etherscan.io/address/0x01e3E47386C9357110aE0D05e2Dd28d841bBd3a1)
