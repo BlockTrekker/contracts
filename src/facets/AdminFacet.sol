@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 
 import "../libraries/AppStorage.sol";
-import "diamond-3/libraries/LibDiamond.sol";
+import "../libraries/LibDiamond.sol";
 
 // =============================================================
 //                      ADMINISTRATION V1

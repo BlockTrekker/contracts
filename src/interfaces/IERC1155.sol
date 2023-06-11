@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 
 /**
  * @dev Required interface of an ERC1155 compliant contract, as defined in the

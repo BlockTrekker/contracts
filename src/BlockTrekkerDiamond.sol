@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 < 0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.19;
+pragma abicoder v2;
 
-import "diamond-3/libraries/LibDiamond.sol";
-import "diamond-3/interfaces/IDiamondLoupe.sol";
-import "diamond-3/interfaces/IDiamondCut.sol";
-import "diamond-3/interfaces/IERC165.sol";
-import "diamond-3/interfaces/IERC173.sol";
+import "./libraries/LibDiamond.sol";
+import "./interfaces/IDiamondLoupe.sol";
+import "./interfaces/IDiamondCut.sol";
+import "./interfaces/IERC165.sol";
+import "./interfaces/IERC173.sol";
 import "./libraries/AppStorage.sol";
 
 contract BlockTrekkerDiamond {

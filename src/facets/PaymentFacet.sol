@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 
 import "../libraries/AppStorage.sol";
-import "../interfaces/IERC20.sol";
-import "diamond-3/libraries/LibDiamond.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../libraries/LibDiamond.sol";
 
 // =============================================================
 //                      PAYMASTER V1

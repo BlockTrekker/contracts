@@ -2,3 +2,4 @@ diamond-3/=lib/diamond-3/contracts/
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 solidity-stringutils/=lib/solidity-stringutils/src/
+@openzeppelin/=lib/openzeppelin-contracts/

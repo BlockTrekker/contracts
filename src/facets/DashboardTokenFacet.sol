@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 
 import "../libraries/AppStorage.sol";
 import "../interfaces/IERC1155.sol";
 import "../interfaces/IERC1155TokenReceiver.sol";
-import "../interfaces/IERC20.sol";
-import "diamond-3/libraries/LibDiamond.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../libraries/LibDiamond.sol";
 
 // =============================================================
 //                      DASHBOARDTOKEN V1
@@ -236,19 +236,7 @@ contract DashboardTokenFacet is IERC1155 {
         // log the token mint event
         emit TokenMinted(_token, msg.sender);
     }
-require(IERC20(s.usdc).allowance(msg.sender, address(this)) >= s.tokens[_token].price, "!AffordMint");
-        // compute the fee taken by the platform & remaining fee taken by creator when minting
-        uint256 platformFee = s.tokens[_token].price * s.feeBP / 10000;
-        uint256 creatorFee = s.tokens[_token].price - platformFee;
-        // send the platform fee to the treasury
-        require(IERC20(s.usdc).transferFrom(msg.sender, s.treasury, platformFee), "!PlatformFee");
-        // send the creator fee to the dashboard creator
-        require(IERC20(s.usdc).transferFrom(msg.sender, s.tokens[_token].creator, creatorFee), "!CreatorFee");
-        // mint the token to the user
-        s.balances[_token][msg.sender] += 1;
-        emit TransferSingle(msg.sender, address(0), msg.sender, _token, 1);
-        // log the token mint event
-        emit TokenMinted(_token, msg.sender);
+
     /**
      * Change the mint price of a dashboard token
      * @dev modifier onlyCreator() - only the creator of the token can call this function

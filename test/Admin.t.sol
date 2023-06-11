@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 pragma abicoder v2;
 
 import "forge-std/Test.sol";
@@ -8,9 +8,9 @@ import "../src/facets/AdminFacet.sol";
 import "../src/facets/DashboardTokenFacet.sol";
 import "../src/facets/PaymentFacet.sol";
 import "../src/facets/ViewFacet.sol";
-import "diamond-3/facets/DiamondCutFacet.sol";
-import "diamond-3/facets/DiamondLoupeFacet.sol";
-import "diamond-3/facets/OwnershipFacet.sol";
+import "../src/facets/DiamondCutFacet.sol";
+import "../src/facets/DiamondLoupeFacet.sol";
+import "../src/facets/OwnershipFacet.sol";
 import "./Helper.sol";
 
 contract AdminFacetTest is Test, Helper {

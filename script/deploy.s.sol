@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8.19;
 pragma abicoder v2;
 
 import "forge-std/Script.sol";
@@ -8,14 +8,10 @@ import "../src/facets/AdminFacet.sol";
 import "../src/facets/DashboardTokenFacet.sol";
 import "../src/facets/PaymentFacet.sol";
 import "../src/facets/ViewFacet.sol";
-import "diamond-3/facets/DiamondCutFacet.sol";
-import "diamond-3/facets/DiamondLoupeFacet.sol";
-import "diamond-3/facets/OwnershipFacet.sol";
+import "../src/facets/DiamondCutFacet.sol";
+import "../src/facets/DiamondLoupeFacet.sol";
+import "../src/facets/OwnershipFacet.sol";
 import "../test/Helper.sol";
-
-// import "../src/facets/DiamondLoupeFacet.sol";
-// import "../src/facets/OwnershipFacet.sol";
-// import "../src/upgradeInitializers/DiamondInit.sol";
 
 contract DeployBlockTrekker is Script, Helper {
 
@@ -28,7 +24,6 @@ contract DeployBlockTrekker is Script, Helper {
         usdc = 0x3C8AC1D5Bd747EF24af4370a652573aF003C6A0c;
         treasury = 0x3729a6a9ceD02C9d0A86ec9834b28825B212aBF3;
         feeBP = 2500;
-        // tokenURI = "https://api.blocktrekker.xyz/token/";
     }
 
     function run() public {
@@ -44,7 +39,7 @@ contract DeployBlockTrekker is Script, Helper {
         PaymentFacet paymentF = new PaymentFacet();
         ViewFacet viewF = new ViewFacet();
 
-
+        // bytes4[] memory q = generateSelectors("DiamondCutFacet");
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](7);
         cut[0] = IDiamondCut.FacetCut({
             facetAddress: address(dCutF),

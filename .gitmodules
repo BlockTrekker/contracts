@@ -12,7 +12,7 @@
 	branch = v1.5.0
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
 	branch = v4.8.3
 [submodule "lib/solidity-stringutils"]
 	path = lib/solidity-stringutils
