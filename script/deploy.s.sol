@@ -7,6 +7,7 @@ import "../src/BlockTrekkerDiamond.sol";
 import "../src/facets/AdminFacet.sol";
 import "../src/facets/DashboardTokenFacet.sol";
 import "../src/facets/PaymentFacet.sol";
+import "../src/facets/ViewFacet.sol";
 import "diamond-3/facets/DiamondCutFacet.sol";
 import "diamond-3/facets/DiamondLoupeFacet.sol";
 import "diamond-3/facets/OwnershipFacet.sol";
@@ -33,7 +34,7 @@ contract DeployBlockTrekker is Script, Helper {
     function run() public {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(privateKey);
-cat
+
         //deploy facets and init contract
         DiamondCutFacet dCutF = new DiamondCutFacet();
         DiamondLoupeFacet dLoupeF = new DiamondLoupeFacet();
@@ -41,8 +42,10 @@ cat
         AdminFacet adminF = new AdminFacet();
         DashboardTokenFacet tokenF = new DashboardTokenFacet();
         PaymentFacet paymentF = new PaymentFacet();
+        ViewFacet viewF = new ViewFacet();
 
-        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](6);
+
+        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](7);
         cut[0] = IDiamondCut.FacetCut({
             facetAddress: address(dCutF),
             action: IDiamondCut.FacetCutAction.Add,
@@ -72,6 +75,11 @@ cat
             facetAddress: address(paymentF),
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: generateSelectors("PaymentFacet")
+        });
+        cut[6] = IDiamondCut.FacetCut({
+            facetAddress: address(viewF),
+            action: IDiamondCut.FacetCutAction.Add,
+            functionSelectors: generateSelectors("ViewFacet")
         });
 
         BlockTrekkerDiamond.DiamondArgs memory args = BlockTrekkerDiamond.DiamondArgs({

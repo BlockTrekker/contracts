@@ -5,9 +5,6 @@ import "../libraries/AppStorage.sol";
 import "../interfaces/IERC20.sol";
 import "diamond-3/libraries/LibDiamond.sol";
 
-
-
-
 // =============================================================
 //                      PAYMASTER V1
 //  Paymaster for onchain payments for BlockTrekker queries
